@@ -8,6 +8,7 @@ class XmtpSDK {
         this.client = null;
         this.signer = null;
     }
+    
     // Returns an XMTP-compatible signer.
     getSigner() {
         if (this.signer) {
@@ -57,7 +58,6 @@ class XmtpSDK {
         if (!this.client) {
             await this.initialize();
         }
-
         return this.client;
     }
 

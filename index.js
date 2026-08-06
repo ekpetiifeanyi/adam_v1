@@ -8,7 +8,6 @@ const initDb = require("./src/database/init");
 const SQL = require("./src/database/Sql");
 const XmtpNotifier = require("./src/notifications/XmtpNotifier");
 const { keepServerAlive } = require("./src/utils/keep-server");
-
 require("dotenv").config();
 
 const express = require("express");
@@ -104,7 +103,6 @@ async function main() {
     await loadAddressCache();
     //bot().catch(console.error);
     keepServerAlive(`http://${HOST}:${PORT}/health`, 10);
-
     app.listen(HOST, PORT, ()=>{
         console.log(`${HOST} listening on PORT: ${PORT}`);
     })

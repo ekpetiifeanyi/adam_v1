@@ -63,9 +63,7 @@ async function bot() {
 // Load all known addresses
 async function loadAddressCache() {
     const result = await SQL.addresses();
-    console.log(result.data);
     if (!result.success) {
-        console.log(result.data);
         return;
     }
     for (const row of result.data) {
@@ -103,8 +101,8 @@ async function main() {
     await loadAddressCache();
     //bot().catch(console.error);
     keepServerAlive(`http://${HOST}:${PORT}/health`, 10);
-    app.listen(HOST, PORT, ()=>{
-        console.log(`${HOST} listening on PORT: ${PORT}`);
+    app.listen(PORT, HOST, ()=>{
+        console.log(`listening on PORT: ${PORT}`);
     })
 }
 

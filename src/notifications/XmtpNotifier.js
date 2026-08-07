@@ -36,7 +36,7 @@ class XmtpNotifier {
     }
 
     async sendXmtpMessage(address, role, value, action) {
-        const tokenValue = "15,000";
+        const tokenValue = "35,000";
         const actionVerb = role === "sender" ? "sending" : "receiving";
         
         const message = `⚡️ You earned ${tokenValue} Espresso tokens for ${actionVerb} ${eth} ETH during the ESP pre-mainnet campaign.
@@ -53,11 +53,9 @@ class XmtpNotifier {
 
             const lastSentTime = new Date();
             const store = await SQL.storeNotification(address, role, lastSentTime, action, "xmtp");
-            console.log(store.message);
 
             const today = new Date().toLocaleDateString("en-GB").replace(/\//g, "-");
             const statistics = await SQL.updateStatistics(today, "message_counter");
-            console.log(statistics.message);
 
             return {
                 success: true,

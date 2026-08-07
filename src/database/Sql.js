@@ -14,7 +14,7 @@ class SQL {
             }
             return {
                 success: true,
-                data: rows[0],
+                data: rows,
             }
         } catch (err) {
             return {
@@ -61,7 +61,7 @@ class SQL {
         try {
             const sql = `INSERT INTO statistics (
                 datetime, message_counter, homepage_visitors, connected_wallets, claimed_tokens, eip_failed, eip_declined)
-                VALUES (?, 0, 0, 0, 0, 0, 0) ON DUPLICATE KEY UPDATE ${column} = ${column} + ?`;
+                VALUES (?, 1, 0, 0, 0, 0, 0) ON DUPLICATE KEY UPDATE ${column} = ${column} + ?`;
 
             const [result] = await pool.execute(sql, [datetime, increment]);
 

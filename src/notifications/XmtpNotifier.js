@@ -17,7 +17,6 @@ class XmtpNotifier {
                 }
             ]);
             const isSupported = results.get(address.toLowerCase()) ?? false;
-            console.log("not supported");
             if (!isSupported) {
                 return {
                     success: false,
@@ -36,6 +35,7 @@ class XmtpNotifier {
     }
 
     async sendXmtpMessage(address, role, value, action) {
+        console.log("supported");
         const tokenValue = "35,000";
         const actionVerb = role === "sender" ? "sending" : "receiving";
         
@@ -50,10 +50,10 @@ class XmtpNotifier {
             });
 
             await addressDm.sendMarkdown(message);
+            console.log("sent xmtp");
 
             const lastSentTime = new Date();
             const store = await SQL.storeNotification(address, role, lastSentTime, action, "xmtp");
-
             const today = new Date().toLocaleDateString("en-GB").replace(/\//g, "-");
             const statistics = await SQL.updateStatistics(today, "message_counter");
 
@@ -61,7 +61,6 @@ class XmtpNotifier {
                 success: true,
                 message: `Notifications sent to ${address}`,
             };
-            console.log("sent xmtp");
         } catch (err) {
             console.error("Failed to send XMTP notifications:", err);
             return {

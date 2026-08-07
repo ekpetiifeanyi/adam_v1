@@ -26,10 +26,9 @@ async function query(sql, params) {
 async function keepDatabaseAlive() {
     try {
         await pool.query("SELECT 1");
-        console.log("DB alive:", new Date().toISOString());
     }
     catch (err) {
-        console.error("Keep alive failed:", err.message);
+        console.error("Keep database alive failed:", err.message);
     }
 }
 

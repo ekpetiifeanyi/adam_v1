@@ -99,7 +99,7 @@ function validateAddress(lastSentTime) {
 async function main() {
     await initDb.init();
     await loadAddressCache();
-    //bot().catch(console.error);
+    bot().catch(console.error);
     keepServerAlive(`http://${HOST}:${PORT}/health`, 10);
     app.listen(PORT, HOST, ()=>{
         console.log(`listening on PORT: ${PORT}`);

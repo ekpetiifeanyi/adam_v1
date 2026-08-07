@@ -6,7 +6,6 @@ function keepServerAlive(url, intervalMinutes) {
         const response = await fetch(url);
         if (response.ok) {
             const data = await response.json();
-            console.log(`[Keep-Alive] Ping successful at ${data.timestamp || new Date().toISOString()}`);
         }
     }
     catch (error) {

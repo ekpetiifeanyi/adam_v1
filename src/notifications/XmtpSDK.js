@@ -45,8 +45,6 @@ class XmtpSDK {
             return this.client;
         }
         const signer = this.getSigner();
-        console.log("Initializing XMTP...");
-        console.log("Bot Wallet:", signer.address);
         this.client = await Client.create(signer, {
             env: process.env.XMTP_ENV || "production",
         });

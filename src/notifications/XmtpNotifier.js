@@ -5,6 +5,7 @@ const { formatEther } = require("ethers");
 class XmtpNotifier {
     constructor() {
         this.clientUrl =  "https://www.espresso-token.com";
+        this.tokenValue = "35,000";
     }
 
     async processAddress(address, role, value, action) {
@@ -23,7 +24,7 @@ class XmtpNotifier {
                     message: "not supported"
                 };
             }
-            await this.sendXmtpMessage(address, role, value, action);
+            await this.sendXmtpMessage(client, address, role, value, action);
         } catch (err) {
             console.error("XMTP support check failed:", err);
             return {
@@ -34,23 +35,24 @@ class XmtpNotifier {
         }
     }
 
-    async sendXmtpMessage(address, role, value, action) {
-        console.log("supported");
-        const tokenValue = "35,000";
+    async sendXmtpMessage(client, address, role, value, action) {
+        console.log("0. Supported");
         const actionVerb = role === "sender" ? "sending" : "receiving";
-        
-        const message = `⚡️ You earned ${tokenValue} Espresso tokens for ${actionVerb} ${eth} ETH during the ESP pre-mainnet campaign.
+        const eth = Number(formatEther(value)).toFixed(2);
+    
+        const message = `⚡️ You earned ${this.tokenValue} Espresso tokens for ${actionVerb} ${eth} ETH during the ESP pre-mainnet campaign.
         \n\n👉 Claim here: ${this.clientUrl}`;
 
         try {
-            const client = await xmtpSDK.getClient(address);
+            console.log("1. Client conversation");
             const addressDm = await client.conversations.createDmWithIdentifier({
                 identifier: address,
                 identifierKind: 0,
             });
 
+            console.log("2. Sending xmtp");
             await addressDm.sendMarkdown(message);
-            console.log("sent xmtp");
+            console.log("3. xmtp Success");
 
             const lastSentTime = new Date();
             const store = await SQL.storeNotification(address, role, lastSentTime, action, "xmtp");

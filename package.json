@@ -13,6 +13,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@neynar/nodejs-sdk": "^3.177.0",
     "@xmtp/node-sdk": "^5.5.0",
     "dotenv": "^17.4.2",
     "ethers": "^6.17.0",

@@ -1,23 +1,17 @@
 const xmtpSDK = require("./XmtpSDK.js");
 const SQL = require("../database/Sql.js");
+const { formatEther } = require("ethers");
 
 class XmtpNotifier {
     constructor() {
-        this.clientUrl = "https://www.espresso-token.com";
+        this.clientUrl =  "https://www.espresso-token.com";
         this.tokenValue = "35,000";
-        this.client = null;
     }
 
-    async initialize() {
-        if (!this.client) {
-            this.client = await xmtpSDK.getClient();
-        }
-        return this.client;
-    }
-
-    async processAddress(address, action, source) {
+    async processAddress(address, role, value, action) {
         try {
-            const results = await this.client.canMessage([
+            const client = await xmtpSDK.getClient();            
+            const results = await client.canMessage([
                 {
                     identifier: address,
                     identifierKind: 0,
@@ -30,33 +24,38 @@ class XmtpNotifier {
                     message: "not supported"
                 };
             }
-            return await this.sendXmtpMessage(address, action, source);
+            await this.sendXmtpMessage(client, address, role, value, action);
         } catch (err) {
             console.error("XMTP support check failed:", err);
             return {
                 success: false,
                 message: err
+
             };
         }
     }
 
-    async sendXmtpMessage(address, action, source) {
-        const message = `⚡️ You've earned ${this.tokenValue} Espresso tokens through the pre-mainnet campaign!
-        
-        🎁 Claim your tokens here:  ${this.clientUrl}`;
+    async sendXmtpMessage(client, address, role, value, action) {
+        const actionVerb = role === "sender" ? "sending" : "receiving";
+        const eth = Number(formatEther(value)).toFixed(2);
+    
+        const message = `⚡️ You earned ${this.tokenValue} Espresso tokens for ${actionVerb} ${eth} ETH during the ESP pre-mainnet campaign.
+        \n\n👉 Claim here: ${this.clientUrl}`;
+
         try {
-            const addressDm = await this.client.conversations.createDmWithIdentifier({
+            const addressDm = await client.conversations.createDmWithIdentifier({
                 identifier: address,
                 identifierKind: 0,
             });
+
             await addressDm.sendMarkdown(message);
             console.log("xmtp Success");
 
             const lastSentTime = new Date();
-            const store = await SQL.storeNotification(address, source, lastSentTime, action, "xmtp");
-
-            const today = lastSentTime.toLocaleDateString("en-GB").replace(/\//g, "-");
+            const store = await SQL.storeNotification(address, role, lastSentTime, action, "xmtp");
+            const today = new Date().toLocaleDateString("en-GB").replace(/\//g, "-");
             const statistics = await SQL.updateStatistics(today, "message_counter");
+
             return {
                 success: true,
                 message: `Notifications sent to ${address}`,

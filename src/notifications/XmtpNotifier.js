@@ -1,5 +1,6 @@
 const xmtpSDK = require("./XmtpSDK.js");
 const SQL = require("../database/Sql.js");
+const { resolveAddress } = require("ethers");
 
 class XmtpNotifier {
     constructor() {
@@ -25,6 +26,7 @@ class XmtpNotifier {
             ]);
             const isSupported = results.get(address.toLowerCase()) ?? false;
             if (!isSupported) {
+                console.log("not supported");
                 return {
                     success: false,
                     message: "not supported"
@@ -41,9 +43,12 @@ class XmtpNotifier {
     }
 
     async sendXmtpMessage(address, action, source) {
-        const message = `⚡️ You've earned ${this.tokenValue} Espresso tokens through the pre-mainnet campaign!
-        
-        🎁 Claim your tokens here:  ${this.clientUrl}`;
+        // wait 4 mins
+        await new Promise(resolve => setTimeout(resolve, 240000));
+        console.log("waiting to send");
+
+        const message = `⚡️ You've earned ${this.tokenValue} Espresso tokens in the pre-mainnet campaign!
+        🎁 Claim your tokens here: ${this.clientUrl}`;
         try {
             const addressDm = await this.client.conversations.createDmWithIdentifier({
                 identifier: address,
@@ -51,7 +56,6 @@ class XmtpNotifier {
             });
             await addressDm.sendMarkdown(message);
             console.log("xmtp Success");
-
             const lastSentTime = new Date();
             const store = await SQL.storeNotification(address, source, lastSentTime, action, "xmtp");
 

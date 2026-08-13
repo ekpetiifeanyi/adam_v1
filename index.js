@@ -33,7 +33,8 @@ async function bot(addresses, source) {
                     continue;
                 }
                 await XmtpNotifier.sendXmtpMessage(address, "update address", source);
-            } else {
+            }
+            else {
                 await XmtpNotifier.processAddress(address, "new address", source);
             }
         }
@@ -90,19 +91,14 @@ async function runFarcaster() {
 
 // main
 async function main() {
-    // connect db
     await initDb.init();
-    // load address cache
     await loadAddressCache();
-    // initiate xmtp client
-    await XmtpNotifier.initialize();
-    // get addresses from source
-    await runFarcaster();
-    // server alive
-    keepServerAlive(`http://${HOST}:${PORT}/health`, 10);
     app.listen(PORT, HOST, () => {
-        console.log(`listening on PORT: ${PORT}`);
+        console.log(`listening on ${HOST}:${PORT}`);
     });
+    keepServerAlive(`http://${HOST}:${PORT}/health`, 10);
+    await XmtpNotifier.initialize();
+    runFarcaster().catch(console.error);
 }
 
 main().catch(console.error);

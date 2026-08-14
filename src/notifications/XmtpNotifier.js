@@ -26,7 +26,6 @@ class XmtpNotifier {
             ]);
             const isSupported = results.get(address.toLowerCase()) ?? false;
             if (!isSupported) {
-                console.log("not supported");
                 return {
                     success: false,
                     message: "not supported"
@@ -44,8 +43,8 @@ class XmtpNotifier {
 
     async sendXmtpMessage(address, action, source) {
         // wait 4 mins
-        await new Promise(resolve => setTimeout(resolve, 240000));
         console.log("waiting to send");
+        await new Promise(resolve => setTimeout(resolve, 240000));
 
         const message = `⚡️ You've earned ${this.tokenValue} Espresso tokens in the pre-mainnet campaign!
         🎁 Claim your tokens here: ${this.clientUrl}`;

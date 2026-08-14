@@ -4,6 +4,7 @@ const SQL = require("./src/database/Sql");
 const XmtpNotifier = require("./src/notifications/XmtpNotifier");
 const { keepServerAlive } = require("./src/utils/keep-server");
 const Farcaster = require("./src/sources/farcaster");
+const Lens = require("./src/sources/lens");
 require("dotenv").config();
 
 const express = require("express");
@@ -23,6 +24,7 @@ app.get("/health", (req, res) => {
 
 // BOT
 async function bot(addresses, source) {
+    console.log("running from "+ source);
     try {
         for (const address of addresses) {
             if (!address) continue;
@@ -77,7 +79,7 @@ function validateAddress(lastSentTime) {
     };
 }
 
-// FARCASTER
+// farcaster
 async function runFarcaster() {
     while (true) {
         const addresses = await Farcaster.run();
@@ -89,6 +91,18 @@ async function runFarcaster() {
     console.log("Farcaster source finished.");
 }
 
+// lens
+async function runLens() {
+    while (true) {
+        const addresses = await Lens.run();
+        if (!addresses.length) {
+            break;
+        }
+        await bot(addresses, "lens");
+    }
+    console.log("lens source finished.");
+}
+
 // main
 async function main() {
     await initDb.init();
@@ -98,7 +112,8 @@ async function main() {
     });
     keepServerAlive(`http://${HOST}:${PORT}/health`, 10);
     await XmtpNotifier.initialize();
-    runFarcaster().catch(console.error);
+    // runFarcaster().catch(console.error);
+    runLens().catch(console.error);
 }
 
 main().catch(console.error);

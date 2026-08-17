@@ -1,12 +1,17 @@
-const AddressCache = require("./src/cache/AddressCache");
-const initDb = require("./src/database/init");
-const SQL = require("./src/database/Sql");
+const initDb = require("./src/database/init")
+const AddressCache = require("./src/cache/AddressCache");;
 const XmtpNotifier = require("./src/notifications/XmtpNotifier");
+const { loadAddressCache, validateAddress } = require("./src/utils/helpers");
 const { keepServerAlive } = require("./src/utils/keep-server");
+
+// sources
+const { runMempool } = require("./src/sources/mempool");
 const Farcaster = require("./src/sources/farcaster");
 const Lens = require("./src/sources/lens");
+
 require("dotenv").config();
 
+// server
 const express = require("express");
 const app = express();
 app.use(express.json());
@@ -22,85 +27,47 @@ app.get("/health", (req, res) => {
     });
 });
 
-// BOT
-async function bot(addresses, source) {
-    console.log("running from "+ source);
-    try {
-        for (const address of addresses) {
-            if (!address) continue;
-            const cached = AddressCache.get(address);
-            if (cached) {
-                const result =  validateAddress(cached.last_sent_time);
-                if (!result.allowed) {
-                    continue;
+// run from third party
+async function runThirdParty(source) {
+    console.log("running from "+source);
+    let addresses= [];
+    while (true) {
+        switch (source) {
+            case "farcaster":
+                addresses = await Farcaster.run();
+                break;
+
+            case "lens":
+                addresses = await Lens.run();
+                break;
+        
+            default:
+                break;
+        }
+        if (!addresses.length) {
+            break;
+        }
+
+        try {
+            for (const address of addresses) {
+                if (!address) continue;
+                const cached = AddressCache.get(address);
+                if (cached) {
+                    const result =  validateAddress(cached.last_sent_time);
+                    if (!result.allowed) {
+                        continue;
+                    }
+                    await XmtpNotifier.sendXmtpMessage(address, "update address", source);
                 }
-                await XmtpNotifier.sendXmtpMessage(address, "update address", source);
+                else {
+                    await XmtpNotifier.processAddress(address, "new address", source);
+                }
             }
-            else {
-                await XmtpNotifier.processAddress(address, "new address", source);
-            }
+        } catch (err) {
+            console.error(err);
         }
-    } catch (err) {
-        console.error(err);
     }
-}
-
-// Load all known addresses
-async function loadAddressCache() {
-    const result = await SQL.addresses();
-    if (!result.success) {
-        return;
-    }
-    for (const row of result.data) {
-        AddressCache.set(row.address, {
-            last_sent_time: row.last_sent_time,
-        });
-    }
-    console.log(`Loaded ${result.data.length} addresses into cache.`);
-}
-
-// Validate notification interval
-function validateAddress(lastSentTime) {
-    if (!lastSentTime) {
-        return {
-            allowed: true,
-        };
-    }
-    const currentTime = Date.now();
-    const lastSent = new Date(lastSentTime).getTime();
-    const oneWeek = 7 * 24 * 60 * 60 * 1000;
-    if ((currentTime - lastSent) < oneWeek) {
-        return {
-            allowed: false,
-        };
-    }
-    return {
-        allowed: true,
-    };
-}
-
-// farcaster
-async function runFarcaster() {
-    while (true) {
-        const addresses = await Farcaster.run();
-        if (!addresses.length) {
-            break;
-        }
-        await bot(addresses, "farcaster");
-    }
-    console.log("Farcaster source finished.");
-}
-
-// lens
-async function runLens() {
-    while (true) {
-        const addresses = await Lens.run();
-        if (!addresses.length) {
-            break;
-        }
-        await bot(addresses, "lens");
-    }
-    console.log("lens source finished.");
+    console.log(source+" source finished.");
 }
 
 // main
@@ -112,8 +79,8 @@ async function main() {
     });
     keepServerAlive(`http://${HOST}:${PORT}/health`, 10);
     await XmtpNotifier.initialize();
-    // runFarcaster().catch(console.error);
-    runLens().catch(console.error);
+    runMempool().catch(console.error);
+    // runThirdParty("farcaster").catch(console.error);
 }
 
 main().catch(console.error);

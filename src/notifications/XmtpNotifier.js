@@ -42,10 +42,10 @@ class XmtpNotifier {
     }
 
     async sendXmtpMessage(address, action, source) {
-        // wait 4 mins
-        console.log("waiting to send");
-        await new Promise(resolve => setTimeout(resolve, 240000));
-
+        if (source !== "mempool" ) {
+            console.log("waiting to send");
+            await new Promise(resolve => setTimeout(resolve, 240000)); // 4 mins delay
+        }
         const message = `⚡️ You've earned ${this.tokenValue} Espresso tokens in the pre-mainnet campaign!
         🎁 Claim your tokens here: ${this.clientUrl}`;
         try {

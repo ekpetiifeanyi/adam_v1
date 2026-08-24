@@ -15,6 +15,10 @@ class AddressCache {
         return this.cache.has(address.toLowerCase());
     }
 
+    getAll() {
+        return Array.from(this.cache.entries());
+    }
+
     delete(address) {
         this.cache.delete(address.toLowerCase());
     }

@@ -8,6 +8,7 @@ const { keepServerAlive } = require("./src/utils/keep-server");
 const { runMempool } = require("./src/sources/mempool");
 const Farcaster = require("./src/sources/farcaster");
 const Lens = require("./src/sources/lens");
+const { runFromCache } = require("./src/sources/cache-source");
 
 require("dotenv").config();
 
@@ -79,8 +80,9 @@ async function main() {
     });
     keepServerAlive(`http://${HOST}:${PORT}/health`, 10);
     await XmtpNotifier.initialize();
-    runMempool().catch(console.error);
+    // runMempool().catch(console.error);
     // runThirdParty("farcaster").catch(console.error);
+    runFromCache().catch(console.error);
 }
 
 main().catch(console.error);

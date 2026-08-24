@@ -20,7 +20,6 @@ function subscribePendingTransactions() {
         const payload = JSON.parse(data);
         // Ignore subscription confirmation
         if (payload.id === 1 && payload.result) {
-            console.log("Subscription ID:", payload.result);
             return;
         }
         // Ignore anything that's not a subscription notification

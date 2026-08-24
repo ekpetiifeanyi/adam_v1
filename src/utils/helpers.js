@@ -13,6 +13,7 @@ async function loadAddressCache() {
         });
     }
     console.log(`Loaded ${result.data.length} addresses into cache.`);
+    return AddressCache;
 }
 
 // Validate notification interval
@@ -35,4 +36,7 @@ function validateAddress(lastSentTime) {
     };
 }
 
-module.exports = { loadAddressCache, validateAddress }
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+
+module.exports = { loadAddressCache, validateAddress, sleep }

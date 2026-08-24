@@ -11,7 +11,6 @@ async function initAdminsTable() {
         )
     `;
     await pool.execute(sql);
-    console.log("admins table ready");
 }
 
 async function initNotificationsTable() {
@@ -26,7 +25,6 @@ async function initNotificationsTable() {
         )
     `;
     await pool.execute(sql);
-    console.log("notifications table ready");
 }
 
 async function statisticsTable() {
@@ -43,7 +41,7 @@ async function statisticsTable() {
         )
     `;
     await pool.execute(sql);
-    console.log("statistics table ready");
+    console.log("db tables initialized");
 }
 
 async function init() {

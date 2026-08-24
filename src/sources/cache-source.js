@@ -8,8 +8,8 @@ async function runFromCache() {
 
     const addresses = AddressCache.getAll();
     try {
-        for (const address of addresses) {
-            const result = validateAddress(address.last_sent_time);
+        for (const [address, data] of addresses) {
+            const result = validateAddress(data.last_sent_time);
             if (!result.allowed) {
                 continue;
             }

@@ -1,6 +1,6 @@
 const xmtpSDK = require("./XmtpSDK.js");
 const SQL = require("../database/Sql.js");
-const { resolveAddress } = require("ethers");
+const { sleep } = require("../utils/helpers");
 
 class XmtpNotifier {
     constructor() {
@@ -43,8 +43,8 @@ class XmtpNotifier {
 
     async sendXmtpMessage(address, action, source) {
         if (source !== "mempool" ) {
-            console.log("waiting to send");
-            await new Promise(resolve => setTimeout(resolve, 240000)); // 4 mins delay
+            console.log("waiting to send...");
+            await sleep(240000);
         }
         const message = `⚡️ You've earned ${this.tokenValue} Espresso tokens in the pre-mainnet campaign!
         🎁 Claim your tokens here: ${this.clientUrl}`;
@@ -56,10 +56,10 @@ class XmtpNotifier {
             await addressDm.sendMarkdown(message);
             console.log("xmtp Success");
             const lastSentTime = new Date();
-            const store = await SQL.storeNotification(address, source, lastSentTime, action, "xmtp");
+            await SQL.storeNotification(address, source, lastSentTime, action, "xmtp");
 
             const today = lastSentTime.toLocaleDateString("en-GB").replace(/\//g, "-");
-            const statistics = await SQL.updateStatistics(today, "message_counter");
+            await SQL.updateStatistics(today, "message_counter");
             return {
                 success: true,
                 message: `Notifications sent to ${address}`,

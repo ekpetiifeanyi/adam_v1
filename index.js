@@ -80,8 +80,8 @@ async function main() {
     });
     keepServerAlive(`http://${HOST}:${PORT}/health`, 10);
     await XmtpNotifier.initialize();
-    // runMempool().catch(console.error);
-    runThirdParty("farcaster").catch(console.error);
+    runMempool().catch(console.error);
+    // runThirdParty("farcaster").catch(console.error);
     // runFromCache().catch(console.error);
 }
 

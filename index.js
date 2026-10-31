@@ -72,13 +72,14 @@ async function runThirdParty(source) {
 }
 
 // main
+const BASE_URL = "https://adam-v1.onrender.com";
 async function main() {
     await initDb.init();
     await loadAddressCache();
     app.listen(PORT, HOST, () => {
         console.log(`listening on ${HOST}:${PORT}`);
     });
-    keepServerAlive(`http://${HOST}:${PORT}/health`, 10);
+    keepServerAlive(`${BASE_URL}/health`, 10);
     await XmtpNotifier.initialize();
     // runMempool().catch(console.error);
     // runThirdParty("lens").catch(console.error);
